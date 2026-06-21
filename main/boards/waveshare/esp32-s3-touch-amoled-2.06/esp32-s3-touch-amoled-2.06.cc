@@ -24,6 +24,8 @@
 
 #define TAG "WaveshareEsp32s3TouchAMOLED2inch06"
 
+extern "C" const lv_image_dsc_t watch_photo_410x502;
+
 class Pmic : public Axp2101 {
 public:
     Pmic(i2c_master_bus_handle_t i2c_bus, uint8_t addr) : Axp2101(i2c_bus, addr) {
@@ -107,6 +109,12 @@ public:
         // to ensure lvgl objects are created before accessing them
     }
 
+    void ApplyWatchPhotoBackground() {
+        lv_obj_set_style_bg_image_src(container_, &watch_photo_410x502, 0);
+        lv_obj_set_style_bg_image_opa(container_, LV_OPA_COVER, 0);
+        lv_obj_set_style_bg_opa(container_, LV_OPA_COVER, 0);
+    }
+
     virtual void SetupUI() override {
         // Call parent SetupUI() first to create all lvgl objects
         SpiLcdDisplay::SetupUI();
@@ -114,7 +122,15 @@ public:
         DisplayLockGuard lock(this);
         lv_obj_set_style_pad_left(status_bar_, LV_HOR_RES*  0.1, 0);
         lv_obj_set_style_pad_right(status_bar_, LV_HOR_RES*  0.1, 0);
+        ApplyWatchPhotoBackground();
         lv_display_add_event_cb(display_, rounder_event_cb, LV_EVENT_INVALIDATE_AREA, NULL);
+    }
+
+    virtual void SetTheme(Theme* theme) override {
+        SpiLcdDisplay::SetTheme(theme);
+
+        DisplayLockGuard lock(this);
+        ApplyWatchPhotoBackground();
     }
 };
 
